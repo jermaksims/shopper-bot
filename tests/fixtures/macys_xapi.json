@@ -1,0 +1,8 @@
+{"body":{"canvas":{"rows":[{"rowSortableGrid":{"zones":[{"sortableGrid":{"collection":[
+ {"product":{"id":12345,"detail":{"name":"Club Room Men's Merino Sweater","brand":{"name":"Club Room"}},
+   "identifier":{"productUrl":"/shop/product/club-room-merino?ID=12345"},
+   "pricing":{"price":{"tieredPrice":[{"label":"Sale","values":[{"value":29.99,"type":"sale"}]},{"label":"Reg.","values":[{"value":75.0,"type":"regular"}]}]}}}},
+ {"product":{"id":67890,"detail":{"name":"Levi's 511 Slim Jeans","brand":{"name":"Levi's"}},
+   "identifier":{"productUrl":"https://www.macys.com/shop/product/levis-511?ID=67890"},
+   "pricing":{"price":{"salePrice":39.99,"regularPrice":69.5}}}}
+]}}]}}]}}}

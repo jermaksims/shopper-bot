@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shopper-bot"
+version = "0.1.0"
+description = "Black Friday clothing deal scraper with a Claude-powered chat"
+requires-python = ">=3.11"
+dependencies = [
+    "curl_cffi>=0.7",
+    "selectolax>=1.0",
+    "pydantic>=2.6",
+    "pyyaml>=6",
+    "typer>=0.12",
+    "rich>=13",
+    "anthropic>=2.0",
+    "openpyxl>=3.1",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.45"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+shopper = "shopper.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["shopper*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

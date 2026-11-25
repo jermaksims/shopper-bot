@@ -1,0 +1,11 @@
+{"status":"ok","result":{"pagination":{"total":2,"offset":0,"count":2},"items":[
+ {"productId":"E465185-000","name":"Souffle Yarn Crew Neck Sweater","genderCategory":"WOMEN","priceGroup":"00",
+  "prices":{"base":{"currency":{"code":"USD","symbol":"$"},"value":49.9},"promo":{"currency":{"code":"USD","symbol":"$"},"value":29.9}},
+  "colors":[{"code":"COL09","displayCode":"09","name":"BLACK"},{"code":"COL31","displayCode":"31","name":"BEIGE"}],
+  "sizes":[{"code":"SMA003","name":"S"},{"code":"SMA004","name":"M"}],
+  "images":{"main":{"09":{"image":"https://image.uniqlo.com/UQ/ST3/us/imagesgoods/465185/item/goods_09_465185.jpg"}}},
+  "rating":{"average":4.5,"count":120}},
+ {"productId":"E450251-000","name":"HEATTECH Crew Neck T-Shirt","genderCategory":"MEN","priceGroup":"00",
+  "prices":{"base":{"currency":{"code":"USD"},"value":14.9},"promo":null},
+  "colors":[{"name":"WHITE"}],"sizes":[{"name":"L"}],"images":{"main":{}}}
+]}}

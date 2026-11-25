@@ -1,0 +1,78 @@
+# Store configuration.
+#
+# methods: fetch strategies tried in order for every category; on a block or empty result the
+#          next one is used.
+#   api     – the site's own JSON/grid endpoint (dedicated adapters only; fastest, cleanest)
+#   http    – category HTML via curl_cffi (Chrome TLS fingerprint) → JSON-LD / embedded state
+#   browser – real Chrome via Playwright, intercepts product XHR JSON (slowest, most robust)
+# min_delay / max_delay: seconds between requests to this store (random in between).
+# headless: false lets you see the browser and solve a one-off challenge by hand.
+#
+# Sale URLs and category ids change every season. If a store returns 0 products, open its sale
+# page in Chrome, DevTools → Network → Fetch/XHR, click "load more", and copy the request
+# path/params here. See README → "Adding or fixing a store".
+
+stores:
+  uniqlo:
+    enabled: true
+    base_url: https://www.uniqlo.com
+    methods: [api, http, browser]
+    api_path: /us/api/commerce/v5/en/products
+    min_delay: 2
+    max_delay: 5
+    categories:
+      - name: sale
+        url: https://www.uniqlo.com/us/en/feature/sale/men
+        params: {flagCodes: discount}     # whole sale catalog; gender comes from each item
+
+  ralphlauren:
+    enabled: true
+    base_url: https://www.ralphlauren.com
+    methods: [api, browser, http]
+    grid_path: /on/demandware.store/Sites-RalphLauren_US-Site/en_US/Search-UpdateGrid
+    page_size: 32
+    min_delay: 4
+    max_delay: 9
+    categories:
+      - {name: men-sale,   gender: men,   url: https://www.ralphlauren.com/men-sale,   cgid: men-sale}
+      - {name: women-sale, gender: women, url: https://www.ralphlauren.com/women-sale, cgid: women-sale}
+
+  tommy:
+    enabled: true
+    base_url: https://usa.tommy.com
+    methods: [http, browser]   # add `api` + grid_path/cgid once confirmed in DevTools
+    min_delay: 3
+    max_delay: 7
+    categories:
+      - {name: men-sale,   gender: men,   url: https://usa.tommy.com/en/men/sale}
+      - {name: women-sale, gender: women, url: https://usa.tommy.com/en/women/sale}
+
+  macys:
+    enabled: true
+    base_url: https://www.macys.com
+    methods: [browser]         # Akamai: plain HTTP is nearly always refused
+    headless: false
+    min_delay: 4
+    max_delay: 10
+    categories:
+      - {name: mens-sale,   gender: men,   url: "https://www.macys.com/shop/sale/mens-sale?id=180838"}
+      - {name: womens-sale, gender: women, url: "https://www.macys.com/shop/sale/womens-sale?id=180837"}
+
+  # ---- Examples for the generic adapter (JSON-LD / embedded state / XHR walker) ----
+  gap:
+    enabled: false
+    adapter: generic
+    brand: Gap
+    base_url: https://www.gap.com
+    methods: [http, browser]
+    categories:
+      - {name: sale, url: "https://www.gap.com/browse/category.do?cid=1127938"}
+
+  levis:
+    enabled: false
+    adapter: generic
+    brand: Levi's
+    base_url: https://www.levi.com
+    methods: [http, browser]
+    categories:
+      - {name: sale, url: https://www.levi.com/US/en_US/sale/c/levi_clothing_sale_us}
