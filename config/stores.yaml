@@ -5,6 +5,11 @@
 #   api     – the site's own JSON/grid endpoint (dedicated adapters only; fastest, cleanest)
 #   http    – category HTML via curl_cffi (Chrome TLS fingerprint) → JSON-LD / embedded state
 #   browser – real Chrome via Playwright, intercepts product XHR JSON (slowest, most robust)
+# browser_engines: engines the `browser` method tries in order (default [patchright]):
+#   patchright – Playwright fork without automation leaks, drives your installed Google Chrome
+#   camoufox   – patched Firefox with C++-level fingerprint spoofing + human-like mouse; slower
+#   playwright – plain Playwright (fallback)
+#   Each engine keeps its own persistent profile in data/profiles/<store>-<engine>/.
 # min_delay / max_delay: seconds between requests to this store (random in between).
 # headless: false lets you see the browser and solve a one-off challenge by hand.
 #
@@ -29,6 +34,7 @@ stores:
     enabled: true
     base_url: https://www.ralphlauren.com
     methods: [api, browser, http]
+    browser_engines: [patchright, camoufox]
     grid_path: /on/demandware.store/Sites-RalphLauren_US-Site/en_US/Search-UpdateGrid
     page_size: 32
     min_delay: 4
@@ -41,6 +47,7 @@ stores:
     enabled: true
     base_url: https://usa.tommy.com
     methods: [http, browser]   # add `api` + grid_path/cgid once confirmed in DevTools
+    browser_engines: [patchright, camoufox]
     min_delay: 3
     max_delay: 7
     categories:
@@ -51,6 +58,7 @@ stores:
     enabled: true
     base_url: https://www.macys.com
     methods: [browser]         # Akamai: plain HTTP is nearly always refused
+    browser_engines: [patchright, camoufox]
     headless: false
     min_delay: 4
     max_delay: 10

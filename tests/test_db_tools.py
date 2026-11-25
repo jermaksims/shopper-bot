@@ -134,5 +134,41 @@ def test_strategy_chain_escalates():
     a = FakeAdapter({"base_url": "https://f", "methods": ["api", "browser"],
                      "categories": [{"name": "a", "url": "u", "gender": "men"}, {"name": "b", "url": "u"}]})
     prods = list(a.scrape(limit=7))
-    assert len(prods) == 7 and a.used_method == "browser"
+    assert len(prods) == 7 and a.used_method == "browser:patchright"
     assert prods[0].gender == "men" and prods[0].category == "a"
+
+
+class EngineAdapter(StoreAdapter):
+    """`browser` expands into one attempt per engine; patchright blocked -> camoufox used."""
+
+    def strategies(self):
+        from shopper.fetch import Blocked
+
+        def browser(cat, limit):
+            self.tried.append(self.engine)
+            if self.engine == "patchright":
+                raise Blocked("akamai challenge")
+            yield self.to_product({"url": "https://e/1", "title": "T", "price": 500}, cat)
+
+        return {"browser": browser}
+
+
+def test_browser_engine_escalation():
+    a = EngineAdapter({"base_url": "https://e", "methods": ["browser"],
+                       "browser_engines": ["patchright", "camoufox"],
+                       "categories": [{"name": "a", "url": "u"}]})
+    a.tried = []
+    assert len(list(a.scrape())) == 1
+    assert a.tried == ["patchright", "camoufox"] and a.used_method == "browser:camoufox"
+
+
+def test_single_engine_string_config():
+    a = StoreAdapter({"base_url": "https://e", "browser_engine": "camoufox"})
+    assert a.browser_engines == ["camoufox"] and a._expanded_methods() == ["http", "browser:camoufox"]
+
+
+def test_unknown_engine_rejected():
+    from shopper.fetch.browser import BrowserFetcher
+
+    with pytest.raises(ValueError):
+        BrowserFetcher("x", engine="chromium-stealth-9000")

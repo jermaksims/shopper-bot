@@ -8,8 +8,9 @@ Tommy Hilfiger, Macy's и любых других — в SQLite, экспорт�
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
-pip install -e '.[browser,dev]'
-playwright install chrome      # или используйте уже установленный Google Chrome
+pip install -e '.[browser,camoufox,dev]'
+patchright install chrome      # или используйте уже установленный Google Chrome
+camoufox fetch                 # скачать браузер Camoufox (~100 МБ), если нужен
 export ANTHROPIC_API_KEY=...   # нужен только для `shopper chat`
 ```
 
@@ -19,6 +20,7 @@ export ANTHROPIC_API_KEY=...   # нужен только для `shopper chat`
 shopper scrape --store uniqlo --limit 50   # пробный запуск одного магазина
 shopper scrape                             # все включённые магазины из config/stores.yaml
 shopper scrape --workers 3                 # магазины параллельно (внутри магазина всегда последовательно)
+shopper scrape -s macys -e camoufox        # принудительно выбрать браузерный движок
 shopper stats                              # сколько товаров, сколько со скидкой, статус блокировок
 shopper top --max-price 50 --gender men    # быстрый топ скидок без LLM
 shopper export deals.xlsx --only-deals     # таблица (CSV или XLSX)
@@ -37,8 +39,17 @@ shopper chat                               # вопросы к Claude на лю�
    у Ralph Lauren). Чистые данные без парсинга вёрстки.
 2. **`http`** — страница категории через `curl_cffi` с TLS/HTTP2-отпечатком настоящего Chrome
    (обычный `requests` банят по отпечатку мгновенно) + JSON-LD / `__NEXT_DATA__` / встроенный state.
-3. **`browser`** — настоящий Chrome через Playwright с постоянным профилем: сайт сам проходит
-   JS-проверки, а мы перехватываем JSON-ответы, которые грузит страница.
+3. **`browser`** — настоящий браузер с постоянным профилем: сайт сам проходит JS-проверки, а мы
+   перехватываем JSON-ответы, которые грузит страница. Движки (`browser_engines` в конфиге,
+   пробуются по очереди, у каждого свой профиль):
+   * **Patchright** (по умолчанию) — форк Playwright без признаков автоматизации
+     (`navigator.webdriver`, `Runtime.enable`, лишние флаги запуска), управляет вашим Google Chrome;
+   * **Camoufox** — изменённый Firefox, подменяет отпечаток на уровне C++ и двигает мышь как
+     человек; медленнее, но сильнее против продвинутого анализа отпечатков;
+   * **playwright** — обычный Playwright как запасной вариант.
+
+   Для Macy's, Ralph Lauren и Tommy задано `[patchright, camoufox]`: если Patchright
+   заблокировали или он не запустился, пробуется Camoufox.
 
 Плюс поведение человека: прогрев с главной страницы, сохранённые куки, пауза 2–10 с со случайным
 разбросом, экспоненциальный откат при 403/429, распознавание страниц-челленджей Akamai /

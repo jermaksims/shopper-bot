@@ -22,6 +22,10 @@ class StoreAdapter:
         self.categories: list[dict] = cfg.get("categories", [])
         self.methods: list[str] = cfg.get("methods", ["http", "browser"])
         self.headless: bool = cfg.get("headless", False)
+        # Browser engines tried in order by the `browser` method, e.g. [patchright, camoufox].
+        engines = cfg.get("browser_engines", cfg.get("browser_engine", ["patchright"]))
+        self.browser_engines: list[str] = [engines] if isinstance(engines, str) else list(engines)
+        self.engine: str = self.browser_engines[0]
         self._http: HttpFetcher | None = None
         self.used_method: str | None = None
 
@@ -45,6 +49,8 @@ class StoreAdapter:
         return BrowserFetcher(
             self.name,
             headless=self.headless,
+            engine=self.engine,
+            proxy=self.cfg.get("proxy"),
             min_delay=self.cfg.get("min_delay", 3.0),
             max_delay=self.cfg.get("max_delay", 8.0),
         )
@@ -63,8 +69,11 @@ class StoreAdapter:
         self.errors: list[str] = []
         for cat in self.categories:
             errors: list[str] = []
-            for method in self.methods:
-                fn = available.get(method)
+            for method in self._expanded_methods():
+                base_method, _, engine = method.partition(":")
+                fn = available.get(base_method)
+                if engine:
+                    self.engine = engine
                 if fn is None:
                     continue
                 try:
@@ -94,6 +103,16 @@ class StoreAdapter:
                     self.errors.append(f"{cat.get('name', cat.get('url'))}: " + "; ".join(errors))
         if not seen and self.errors:
             raise Blocked(" | ".join(self.errors))
+
+    def _expanded_methods(self) -> list[str]:
+        """``browser`` becomes ``browser:<engine>`` for every configured engine."""
+        out = []
+        for m in self.methods:
+            if m == "browser":
+                out += [f"browser:{e}" for e in self.browser_engines]
+            else:
+                out.append(m)
+        return out
 
     def close(self) -> None:
         if self._http:

@@ -19,7 +19,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-browser = ["playwright>=1.45"]
+browser = ["patchright>=1.50"]
+camoufox = ["camoufox[geoip]>=0.4"]
+playwright = ["playwright>=1.45"]
 dev = ["pytest>=8"]
 
 [project.scripts]

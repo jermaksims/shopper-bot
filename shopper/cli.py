@@ -49,6 +49,9 @@ def scrape(
     store: list[str] = typer.Option(None, "--store", "-s", help="Store(s) to scrape; default: all enabled"),
     limit: Optional[int] = typer.Option(None, help="Max products per store (useful for testing)"),
     workers: int = typer.Option(1, help="Stores scraped in parallel (each store itself stays sequential)"),
+    engine: list[str] = typer.Option(None, "--engine", "-e",
+                                     help="Browser engine(s) for the `browser` method, in order: "
+                                          "patchright, camoufox, playwright (overrides stores.yaml)"),
     db: Path = typer.Option(dbm.DEFAULT_DB, help="SQLite database path"),
     verbose: bool = typer.Option(False, "-v"),
 ):
@@ -59,6 +62,14 @@ def scrape(
     unknown = [n for n in names if n not in cfg]
     if unknown:
         raise typer.BadParameter(f"unknown store(s): {', '.join(unknown)}; known: {', '.join(cfg)}")
+    if engine:
+        from shopper.fetch.browser import ENGINES
+
+        bad = [e for e in engine if e not in ENGINES]
+        if bad:
+            raise typer.BadParameter(f"unknown engine(s): {', '.join(bad)}; choose from {', '.join(ENGINES)}")
+        for n in names:
+            cfg[n] = {**cfg[n], "browser_engines": engine}
     dbm.connect(db).close()  # create schema
     with ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
         results = list(ex.map(lambda n: _scrape_one(n, cfg[n], db, limit), names))
